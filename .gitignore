@@ -1,0 +1,25 @@
+# Diretórios do Maven
+/target/
+
+# IDEs
+/.idea/
+/*.iml
+/.classpath
+/.project
+/.settings/
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Arquivos de configuração local
+*.env
+.env
+application-local.properties
+
+# Credenciais e configs sensíveis
+/src/main/resources/application.properties
+/src/main/resources/application.yml
