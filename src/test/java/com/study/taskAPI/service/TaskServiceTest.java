@@ -1,6 +1,10 @@
 package com.study.taskAPI.service;
 
+import com.study.taskAPI.dto.TaskCreateRequest;
+import com.study.taskAPI.dto.TaskResponse;
 import com.study.taskAPI.dto.TaskSummaryResponse;
+import com.study.taskAPI.dto.mapper.TaskCreateRequestMapper;
+import com.study.taskAPI.dto.mapper.TaskResponseMapper;
 import com.study.taskAPI.dto.mapper.TaskSummaryResponseMapper;
 import com.study.taskAPI.enums.Priority;
 import com.study.taskAPI.enums.Status;
@@ -28,6 +32,12 @@ public class TaskServiceTest {
 
     @Mock
     private TaskSummaryResponseMapper summaryMapper;
+
+    @Mock
+    private TaskCreateRequestMapper createRequestMapper;
+
+    @Mock
+    private TaskResponseMapper responseMapper;
 
     @Test
     void shouldReturnListOfTaskSummaries() {
@@ -74,6 +84,26 @@ public class TaskServiceTest {
         List<TaskSummaryResponse> result = service.getTaskSummariesByStatus(Status.TO_DO);
 
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void shouldCreateTaskAndReturnResponse() {
+        TaskCreateRequest request = new TaskCreateRequest("Título", "Descrição", LocalDate.now(), Priority.LOW, null);
+        Task entity = new Task(null, "Título", "Descrição", LocalDate.now(), Priority.LOW, Status.TO_DO);
+        Task saved = new Task(1, "Título", "Descrição", LocalDate.now(), Priority.LOW, Status.TO_DO);
+        TaskResponse response = new TaskResponse(1, "Título", "Descrição", LocalDate.now(), Priority.LOW, Status.TO_DO);
+
+        when(createRequestMapper.toEntity(request)).thenReturn(entity);
+        when(repository.save(entity)).thenReturn(saved);
+        when(responseMapper.toDTO(saved)).thenReturn(response);
+
+        TaskResponse result = service.createTask(request);
+
+        assertThat(result.getId()).isEqualTo(1);
+        assertThat(result.getTitle()).isEqualTo("Título");
+        assertThat(result.getDescription()).isEqualTo("Descrição");
+        assertThat(result.getStatus()).isEqualTo(Status.TO_DO);
+        assertThat(result.getPriority()).isEqualTo(Priority.LOW);
     }
 
 }
