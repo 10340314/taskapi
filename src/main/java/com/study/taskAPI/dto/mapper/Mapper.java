@@ -23,13 +23,13 @@ public abstract class Mapper<E, D> {
 
     public List<D> toDTOList(List<E> entities) {
         if (entities == null)
-            return null;
+            return List.of();
         return entities.stream().map(this::toDTO).toList();
     }
 
     public List<E> toEntityList(List<D> dtos) {
         if (dtos == null)
-            return null;
+            return List.of();
         return dtos.stream().map(this::toEntity).toList();
     }
 }
