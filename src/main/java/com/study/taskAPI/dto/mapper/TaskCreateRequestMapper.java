@@ -9,6 +9,11 @@ import org.springframework.stereotype.Component;
 public class TaskCreateRequestMapper extends Mapper<Task, TaskCreateRequest> {
 
     @Override
+    protected TaskCreateRequest mapToDTO(Task o) {
+        throw new UnsupportedOperationException("DTO de criação não é retornado para o cliente.");
+    }
+
+    @Override
     protected Task mapToEntity(TaskCreateRequest taskCreateRequest) {
         return new Task(
                 null,
@@ -18,10 +23,5 @@ public class TaskCreateRequestMapper extends Mapper<Task, TaskCreateRequest> {
                 taskCreateRequest.getPriority(),
                 taskCreateRequest.getStatus() != null ? taskCreateRequest.getStatus() : Status.TO_DO
         );
-    }
-
-    @Override
-    protected TaskCreateRequest mapToDTO(Task o) {
-        throw new UnsupportedOperationException("DTO de criação não é retornado para o cliente.");
     }
 }

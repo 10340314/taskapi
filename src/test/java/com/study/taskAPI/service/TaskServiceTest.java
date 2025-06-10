@@ -3,9 +3,11 @@ package com.study.taskAPI.service;
 import com.study.taskAPI.dto.TaskCreateRequest;
 import com.study.taskAPI.dto.TaskResponse;
 import com.study.taskAPI.dto.TaskSummaryResponse;
+import com.study.taskAPI.dto.TaskUpdateRequest;
 import com.study.taskAPI.dto.mapper.TaskCreateRequestMapper;
 import com.study.taskAPI.dto.mapper.TaskResponseMapper;
 import com.study.taskAPI.dto.mapper.TaskSummaryResponseMapper;
+import com.study.taskAPI.dto.mapper.TaskUpdateRequestMapper;
 import com.study.taskAPI.enums.Priority;
 import com.study.taskAPI.enums.Status;
 import com.study.taskAPI.model.Task;
@@ -15,11 +17,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatException;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,6 +45,9 @@ public class TaskServiceTest {
 
     @Mock
     private TaskResponseMapper responseMapper;
+
+    @Mock
+    private TaskUpdateRequestMapper updateRequestMapper;
 
     @Test
     void shouldReturnListOfTaskSummaries() {
@@ -102,8 +112,42 @@ public class TaskServiceTest {
         assertThat(result.getId()).isEqualTo(1);
         assertThat(result.getTitle()).isEqualTo("Título");
         assertThat(result.getDescription()).isEqualTo("Descrição");
-        assertThat(result.getStatus()).isEqualTo(Status.TO_DO);
         assertThat(result.getPriority()).isEqualTo(Priority.LOW);
+        assertThat(result.getStatus()).isEqualTo(Status.TO_DO);
+    }
+
+    @Test
+    void shouldUpdateTaskAndReturnResponse() {
+        int id = 1;
+        TaskUpdateRequest request = new TaskUpdateRequest("Título novo", "Descrição", LocalDate.of(2025, 6, 9), Priority.LOW, Status.TO_DO);
+        Task entity = new Task(null, "Título novo", "Descrição", LocalDate.of(2025, 6, 9), Priority.LOW, Status.TO_DO);
+        Task existingEntity = new Task(id, "Título", "Descrição", LocalDate.of(2025, 6, 9), Priority.LOW, Status.TO_DO);
+        Task saved = new Task(id, "Título novo", "Descrição", LocalDate.of(2025, 6, 9), Priority.LOW, Status.TO_DO);
+        TaskResponse response = new TaskResponse(id, "Título novo", "Descrição", LocalDate.of(2025, 6, 9), Priority.LOW, Status.TO_DO);
+
+        when(repository.findById(id)).thenReturn(Optional.of(existingEntity));
+        when(updateRequestMapper.toEntity(request)).thenReturn(entity);
+        when(repository.save(entity)).thenReturn(saved);
+        when(responseMapper.toDTO(saved)).thenReturn(response);
+
+        TaskResponse result = service.updateTask(id, request);
+
+        assertThat(result.getId()).isEqualTo(id);
+        assertThat(result.getTitle()).isEqualTo("Título novo");
+        assertThat(result.getDescription()).isEqualTo("Descrição");
+        assertThat(result.getDueDate()).isEqualTo(LocalDate.of(2025, 6, 9));
+        assertThat(result.getPriority()).isEqualTo(Priority.LOW);
+        assertThat(result.getStatus()).isEqualTo(Status.TO_DO);
+    }
+
+    @Test
+    void shouldNotUpdateTaskAndReturnNotFound() {
+        int id = 1;
+        TaskUpdateRequest request = new TaskUpdateRequest("Título novo", "Descrição", LocalDate.of(2025, 6, 9), Priority.LOW, Status.TO_DO);
+
+        when(repository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(ResponseStatusException.class, () -> service.updateTask(id, request));
     }
 
 }
