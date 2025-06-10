@@ -2,6 +2,7 @@ package com.study.taskAPI.controller;
 
 import com.study.taskAPI.dto.TaskCreateRequest;
 import com.study.taskAPI.dto.TaskResponse;
+import com.study.taskAPI.dto.TaskUpdateRequest;
 import com.study.taskAPI.service.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,5 +27,10 @@ public class TaskController {
     public ResponseEntity<TaskResponse> createTask(@RequestBody @Valid TaskCreateRequest task) {
         TaskResponse createdTask = service.createTask(task);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTask);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<TaskResponse> updateTask(@PathVariable Integer id, @RequestBody @Valid TaskUpdateRequest task) {
+        return ResponseEntity.status(HttpStatus.OK).body(service.updateTask(id, task));
     }
 }

@@ -3,14 +3,18 @@ package com.study.taskAPI.service;
 import com.study.taskAPI.dto.TaskCreateRequest;
 import com.study.taskAPI.dto.TaskResponse;
 import com.study.taskAPI.dto.TaskSummaryResponse;
+import com.study.taskAPI.dto.TaskUpdateRequest;
 import com.study.taskAPI.dto.mapper.TaskCreateRequestMapper;
 import com.study.taskAPI.dto.mapper.TaskResponseMapper;
 import com.study.taskAPI.dto.mapper.TaskSummaryResponseMapper;
+import com.study.taskAPI.dto.mapper.TaskUpdateRequestMapper;
 import com.study.taskAPI.enums.Status;
 import com.study.taskAPI.model.Task;
 import com.study.taskAPI.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -24,6 +28,9 @@ public class TaskService {
     private TaskCreateRequestMapper taskCreateRequestMapper;
     @Autowired
     private TaskSummaryResponseMapper taskSummaryResponseMapper;
+    @Autowired
+    private TaskUpdateRequestMapper taskUpdateRequestMapper;
+
     public List<TaskResponse> getAllTasks() {
         return taskResponseMapper.toDTOList(repository.findAll());
     }
@@ -39,5 +46,12 @@ public class TaskService {
 
     public List<TaskSummaryResponse> getTaskSummariesByStatus(Status status) {
         return taskSummaryResponseMapper.toDTOList(repository.findByStatus(status));
+    }
+
+    public TaskResponse updateTask(Integer id, TaskUpdateRequest request) {
+        Task existingTask = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa de id %d não encontrada.".formatted(id)));
+        Task updateTask = taskUpdateRequestMapper.toEntity(request);
+        updateTask.setId(id);
+        return taskResponseMapper.toDTO(repository.save(updateTask));
     }
 }
