@@ -23,6 +23,11 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.OK).body(service.getAllTasks());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<TaskResponse> getTaskById(@PathVariable Integer id) {
+        return ResponseEntity.status(HttpStatus.OK).body(service.getTaskById(id));
+    }
+
     @PostMapping("/")
     public ResponseEntity<TaskResponse> createTask(@RequestBody @Valid TaskCreateRequest task) {
         TaskResponse createdTask = service.createTask(task);

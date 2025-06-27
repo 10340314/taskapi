@@ -37,11 +37,9 @@ public class TaskControllerTest {
     @DisplayName("Deve criar uma task e retornar o DTO de resposta com status 201")
     @Test
     void shouldCreateTaskAndReturnResponse() throws Exception {
-        TaskCreateRequest request = new TaskCreateRequest(
-                "Título", "Descrição", LocalDate.of(2025, 6, 4), Priority.LOW, null);
+        TaskCreateRequest request = new TaskCreateRequest("Título", "Descrição", LocalDate.of(2025, 6, 4), Priority.LOW, null);
 
-        TaskResponse response = new TaskResponse(
-                1, "Título", "Descrição", LocalDate.of(2025, 6, 4), Priority.LOW, Status.TO_DO);
+        TaskResponse response = new TaskResponse(1, "Título", "Descrição", LocalDate.of(2025, 6, 4), Priority.LOW, Status.TO_DO);
 
         when(service.createTask(any(TaskCreateRequest.class))).thenReturn(response);
 

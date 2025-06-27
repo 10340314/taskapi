@@ -150,4 +150,33 @@ public class TaskServiceTest {
         assertThrows(ResponseStatusException.class, () -> service.updateTask(id, request));
     }
 
+    @Test
+    void shouldReturnTaskWithSpecifiedID() {
+        int id = 1;
+        Task task = new Task(id, "Título", "Descrição", LocalDate.of(2025, 6, 26), Priority.LOW, Status.TO_DO);
+        TaskResponse taskResponse = new TaskResponse(id, "Título", "Descrição", LocalDate.of(2025, 6, 26), Priority.LOW, Status.TO_DO);
+
+        when(repository.findById(id)).thenReturn(Optional.of(task));
+        when(responseMapper.toDTO(task)).thenReturn(taskResponse);
+
+        TaskResponse result = service.getTaskById(id);
+
+        assertThat(result.getId()).isEqualTo(taskResponse.getId());
+        assertThat(result.getTitle()).isEqualTo(taskResponse.getTitle());
+        assertThat(result.getDescription()).isEqualTo(taskResponse.getDescription());
+        assertThat(result.getDueDate()).isEqualTo(taskResponse.getDueDate());
+        assertThat(result.getPriority()).isEqualTo(taskResponse.getPriority());
+        assertThat(result.getStatus()).isEqualTo(taskResponse.getStatus());
+    }
+
+    @Test
+    void shouldNotFindTaskAndReturnNotFound() {
+        int id = 1;
+
+        when(repository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(ResponseStatusException.class, () -> service.getTaskById(id));
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> service.getTaskById(id));
+        assertThat(ex.getReason()).contains("Tarefa de id %d não encontrada".formatted(id));
+    }
 }
