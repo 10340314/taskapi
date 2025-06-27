@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TaskService {
@@ -53,5 +54,10 @@ public class TaskService {
         Task updateTask = taskUpdateRequestMapper.toEntity(request);
         updateTask.setId(id);
         return taskResponseMapper.toDTO(repository.save(updateTask));
+    }
+
+    public TaskResponse getTaskById(int id) {
+        Task task = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa de id %d não encontrada".formatted(id)));
+        return taskResponseMapper.toDTO(task);
     }
 }
