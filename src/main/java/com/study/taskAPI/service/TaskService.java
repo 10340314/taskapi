@@ -1,23 +1,25 @@
 package com.study.taskAPI.service;
 
-import com.study.taskAPI.dto.TaskCreateRequest;
-import com.study.taskAPI.dto.TaskResponse;
-import com.study.taskAPI.dto.TaskSummaryResponse;
-import com.study.taskAPI.dto.TaskUpdateRequest;
+import com.study.taskAPI.dto.*;
 import com.study.taskAPI.dto.mapper.TaskCreateRequestMapper;
 import com.study.taskAPI.dto.mapper.TaskResponseMapper;
 import com.study.taskAPI.dto.mapper.TaskSummaryResponseMapper;
 import com.study.taskAPI.dto.mapper.TaskUpdateRequestMapper;
+import com.study.taskAPI.enums.Priority;
 import com.study.taskAPI.enums.Status;
 import com.study.taskAPI.model.Task;
 import com.study.taskAPI.repository.TaskRepository;
+import com.study.taskAPI.utils.TaskSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
+
+import static com.study.taskAPI.utils.TaskSpecification.*;
 
 @Service
 public class TaskService {
@@ -59,5 +61,14 @@ public class TaskService {
     public TaskResponse getTaskById(int id) {
         Task task = repository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tarefa de id %d não encontrada".formatted(id)));
         return taskResponseMapper.toDTO(task);
+    }
+
+    public List<TaskSummaryResponse> getFilteredTaskSummaries(String title, Priority priority, Status status, LocalDate dueDateBefore, LocalDate dueDateAfter) {
+        Specification<Task> spec = Specification.where(withTitleLike(title))
+                                                .and(withPriority(priority))
+                                                .and(withStatus(status))
+                                                .and(withDueDateBefore(dueDateBefore))
+                                                .and(withDueDateAfter(dueDateAfter));
+        return taskSummaryResponseMapper.toDTOList(repository.findAll(spec));
     }
 }

@@ -1,9 +1,6 @@
 package com.study.taskAPI.service;
 
-import com.study.taskAPI.dto.TaskCreateRequest;
-import com.study.taskAPI.dto.TaskResponse;
-import com.study.taskAPI.dto.TaskSummaryResponse;
-import com.study.taskAPI.dto.TaskUpdateRequest;
+import com.study.taskAPI.dto.*;
 import com.study.taskAPI.dto.mapper.TaskCreateRequestMapper;
 import com.study.taskAPI.dto.mapper.TaskResponseMapper;
 import com.study.taskAPI.dto.mapper.TaskSummaryResponseMapper;
@@ -17,7 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
@@ -25,8 +22,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatException;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -178,5 +175,30 @@ public class TaskServiceTest {
         assertThrows(ResponseStatusException.class, () -> service.getTaskById(id));
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> service.getTaskById(id));
         assertThat(ex.getReason()).contains("Tarefa de id %d não encontrada".formatted(id));
+    }
+
+    @Test
+    void shouldReturnTasks_whenTitlePriorityAndStatusAreFiltered() {
+        Task task1 = new Task(1, "Título teste 1", "Descrição teste 1", LocalDate.of(2025,7,6), Priority.LOW, Status.DONE);
+        Task task2 = new Task(2, "Título teste 2", "Descrição teste 2", LocalDate.of(2025,7,6), Priority.LOW, Status.DONE);
+        TaskSummaryResponse taskSummary1 = new TaskSummaryResponse(1, "Título teste 1", Priority.LOW, Status.DONE);
+        TaskSummaryResponse taskSummary2 = new TaskSummaryResponse(2, "Título teste 2", Priority.LOW, Status.DONE);
+
+        List<TaskSummaryResponse> summaryList = List.of(taskSummary1, taskSummary2);
+
+        when(repository.findAll(any(Specification.class))).thenReturn(List.of(task1, task2));
+        when(summaryMapper.toDTOList(List.of(task1, task2))).thenReturn(summaryList);
+
+        List<TaskSummaryResponse> result = service.getFilteredTaskSummaries("Título", Priority.LOW, Status.DONE, null, null);
+
+        assertThat(result).hasSize(2);
+
+        assertThat(result.get(0).getTitle()).contains("Título");
+        assertThat(result.get(0).getPriority()).isEqualTo(Priority.LOW);
+        assertThat(result.get(0).getStatus()).isEqualTo(Status.DONE);
+
+        assertThat(result.get(1).getTitle()).contains("Título");
+        assertThat(result.get(1).getPriority()).isEqualTo(Priority.LOW);
+        assertThat(result.get(1).getStatus()).isEqualTo(Status.DONE);
     }
 }
