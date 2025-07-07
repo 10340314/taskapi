@@ -189,7 +189,7 @@ public class TaskServiceTest {
         when(repository.findAll(any(Specification.class))).thenReturn(List.of(task1, task2));
         when(summaryMapper.toDTOList(List.of(task1, task2))).thenReturn(summaryList);
 
-        List<TaskSummaryResponse> result = service.getFilteredTaskSummaries("Título", Priority.LOW, Status.DONE, null, null);
+        List<TaskSummaryResponse> result = service.getFilteredTaskSummaries(new TaskFilterRequest("Título", null, null, null, Status.DONE, Priority.LOW));
 
         assertThat(result).hasSize(2);
 

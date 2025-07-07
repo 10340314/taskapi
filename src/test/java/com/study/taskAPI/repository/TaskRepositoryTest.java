@@ -108,4 +108,30 @@ public class TaskRepositoryTest {
                         tuple("Título teste 3", Priority.LOW, LocalDate.of(2025, 7, 6))
                 );
     }
+
+    @Test
+    void shouldReturnTasks_whenDueDateBeforeAndAfterAreFiltered() {
+        Task task1 = new Task(null, "Título teste 1", "Descrição teste 1", LocalDate.of(2025,7,6), Priority.LOW, Status.DONE);
+        Task task2 = new Task(null, "Título teste 2", "Descrição teste 2", LocalDate.of(2025,7,7), Priority.LOW, Status.DONE);
+        Task task3 = new Task(null, "Título teste 3", "Descrição teste 3", LocalDate.of(2025,7,8), Priority.LOW, Status.TO_DO);
+
+        repository.save(task1);
+        repository.save(task2);
+        repository.save(task3);
+
+        LocalDate date1 = LocalDate.of(2025, 7, 6);
+        LocalDate date2 = LocalDate.of(2025, 7, 7);
+
+
+        Specification<Task> spec = Specification.where(withDueDateBetween(date1, date2));
+
+        List<Task> results = repository.findAll(spec);
+
+        assertThat(results).hasSize(2);
+        assertThat(results).extracting("dueDate")
+                .containsExactlyInAnyOrder(
+                        LocalDate.of(2025, 7, 6),
+                        LocalDate.of(2025, 7, 7)
+                );
+    }
 }
