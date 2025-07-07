@@ -1,9 +1,6 @@
 package com.study.taskAPI.controller;
 
-import com.study.taskAPI.dto.TaskCreateRequest;
-import com.study.taskAPI.dto.TaskResponse;
-import com.study.taskAPI.dto.TaskSummaryResponse;
-import com.study.taskAPI.dto.TaskUpdateRequest;
+import com.study.taskAPI.dto.*;
 import com.study.taskAPI.enums.Priority;
 import com.study.taskAPI.enums.Status;
 import com.study.taskAPI.service.TaskService;
@@ -33,13 +30,8 @@ public class TaskController {
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<List<TaskSummaryResponse>> getFilteredTaskSummaries(
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) Priority priority,
-            @RequestParam(required = false) Status status,
-            @RequestParam(required = false) LocalDate dueDateBefore,
-            @RequestParam(required = false) LocalDate dueDateAfter) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.getFilteredTaskSummaries(title, priority, status, dueDateBefore, dueDateAfter));
+    public ResponseEntity<List<TaskSummaryResponse>> getFilteredTaskSummaries(@Valid @ModelAttribute TaskFilterRequest taskFilter) {
+        return ResponseEntity.status(HttpStatus.OK).body(service.getFilteredTaskSummaries(taskFilter));
     }
 
     @PostMapping("/")

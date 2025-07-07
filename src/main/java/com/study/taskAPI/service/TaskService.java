@@ -63,12 +63,13 @@ public class TaskService {
         return taskResponseMapper.toDTO(task);
     }
 
-    public List<TaskSummaryResponse> getFilteredTaskSummaries(String title, Priority priority, Status status, LocalDate dueDateBefore, LocalDate dueDateAfter) {
-        Specification<Task> spec = Specification.where(withTitleLike(title))
-                                                .and(withPriority(priority))
-                                                .and(withStatus(status))
-                                                .and(withDueDateBefore(dueDateBefore))
-                                                .and(withDueDateAfter(dueDateAfter));
+    public List<TaskSummaryResponse> getFilteredTaskSummaries(TaskFilterRequest taskFilter) {
+        Specification<Task> spec = Specification.where(withTitleLike(taskFilter.getTitle()))
+                                                .and(withPriority(taskFilter.getPriority()))
+                                                .and(withStatus(taskFilter.getStatus()))
+                                                .and(withDueDateBetween(taskFilter.getDueDateBefore(), taskFilter.getDueDateAfter()));
+//                                                .and(withDueDateBefore(taskFilter.getDueDateBefore()))
+//                                                .and(withDueDateAfter(taskFilter.getDueDateAfter()));
         return taskSummaryResponseMapper.toDTOList(repository.findAll(spec));
     }
 }
