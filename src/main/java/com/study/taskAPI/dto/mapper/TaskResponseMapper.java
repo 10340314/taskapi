@@ -1,7 +1,6 @@
 package com.study.taskAPI.dto.mapper;
 
 import com.study.taskAPI.dto.TaskResponse;
-import com.study.taskAPI.enums.Status;
 import com.study.taskAPI.model.Task;
 import org.springframework.stereotype.Component;
 

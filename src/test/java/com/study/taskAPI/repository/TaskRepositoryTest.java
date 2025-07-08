@@ -6,6 +6,10 @@ import com.study.taskAPI.model.Task;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
@@ -34,11 +38,12 @@ public class TaskRepositoryTest {
                                                 .and(withPriority(Priority.LOW))
                                                 .and(withStatus(Status.DONE)));
 
-        List<Task> results = repository.findAll(spec);
+        Pageable pageable = PageRequest.of(0, 10, Sort.Direction.ASC, "dueDate");
+        Page<Task> results = repository.findAll(spec, pageable);
 
-        assertThat(results).hasSize(2);
+        assertThat(results.getContent()).hasSize(2);
 
-        assertThat(results)
+        assertThat(results.getContent())
                 .extracting("title", "priority", "status")
                 .containsExactlyInAnyOrder(
                         tuple("Título teste 1", Priority.LOW, Status.DONE),
@@ -58,9 +63,10 @@ public class TaskRepositoryTest {
                                                 .and(withPriority(Priority.LOW))
                                                 .and(withStatus(Status.DONE));
 
-        List<Task> results = repository.findAll(spec);
+        Pageable pageable = PageRequest.of(0, 10, Sort.Direction.ASC, "dueDate");
+        Page<Task> results = repository.findAll(spec, pageable);
 
-        assertThat(results).isEmpty();
+        assertThat(results.getContent()).isEmpty();
     }
 
     @Test
@@ -77,9 +83,10 @@ public class TaskRepositoryTest {
                                                 .and(withDueDateBefore(null))
                                                 .and(withDueDateAfter(null));
 
-        List<Task> results = repository.findAll(spec);
+        Pageable pageable = PageRequest.of(0, 10, Sort.Direction.ASC, "dueDate");
+        Page<Task> results = repository.findAll(spec, pageable);
 
-        assertThat(results).hasSize(2);
+        assertThat(results.getContent()).hasSize(2);
     }
 
     @Test
@@ -98,10 +105,11 @@ public class TaskRepositoryTest {
                                                 .and(withDueDateBefore(LocalDate.of(2025,7,8)))
                                                 .and(withDueDateAfter(null));
 
-        List<Task> results = repository.findAll(spec);
+        Pageable pageable = PageRequest.of(0, 10, Sort.Direction.ASC, "dueDate");
+        Page<Task> results = repository.findAll(spec, pageable);
 
-        assertThat(results).hasSize(2);
-        assertThat(results)
+        assertThat(results.getContent()).hasSize(2);
+        assertThat(results.getContent())
                 .extracting("title", "priority", "dueDate")
                 .containsExactlyInAnyOrder(
                         tuple("Título teste 1", Priority.LOW, LocalDate.of(2025, 7, 6)),
@@ -125,10 +133,11 @@ public class TaskRepositoryTest {
 
         Specification<Task> spec = Specification.where(withDueDateBetween(date1, date2));
 
-        List<Task> results = repository.findAll(spec);
+        Pageable pageable = PageRequest.of(0, 10, Sort.Direction.ASC, "dueDate");
+        Page<Task> results = repository.findAll(spec, pageable);
 
-        assertThat(results).hasSize(2);
-        assertThat(results).extracting("dueDate")
+        assertThat(results.getContent()).hasSize(2);
+        assertThat(results.getContent()).extracting("dueDate")
                 .containsExactlyInAnyOrder(
                         LocalDate.of(2025, 7, 6),
                         LocalDate.of(2025, 7, 7)
