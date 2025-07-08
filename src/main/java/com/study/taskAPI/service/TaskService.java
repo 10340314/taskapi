@@ -5,18 +5,17 @@ import com.study.taskAPI.dto.mapper.TaskCreateRequestMapper;
 import com.study.taskAPI.dto.mapper.TaskResponseMapper;
 import com.study.taskAPI.dto.mapper.TaskSummaryResponseMapper;
 import com.study.taskAPI.dto.mapper.TaskUpdateRequestMapper;
-import com.study.taskAPI.enums.Priority;
 import com.study.taskAPI.enums.Status;
 import com.study.taskAPI.model.Task;
 import com.study.taskAPI.repository.TaskRepository;
-import com.study.taskAPI.utils.TaskSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import static com.study.taskAPI.utils.TaskSpecification.*;
@@ -63,13 +62,14 @@ public class TaskService {
         return taskResponseMapper.toDTO(task);
     }
 
-    public List<TaskSummaryResponse> getFilteredTaskSummaries(TaskFilterRequest taskFilter) {
+    public Page<TaskSummaryResponse> getFilteredTaskSummaries(TaskFilterRequest taskFilter, Pageable pageable) {
         Specification<Task> spec = Specification.where(withTitleLike(taskFilter.getTitle()))
                                                 .and(withPriority(taskFilter.getPriority()))
                                                 .and(withStatus(taskFilter.getStatus()))
                                                 .and(withDueDateBetween(taskFilter.getDueDateBefore(), taskFilter.getDueDateAfter()));
 //                                                .and(withDueDateBefore(taskFilter.getDueDateBefore()))
 //                                                .and(withDueDateAfter(taskFilter.getDueDateAfter()));
-        return taskSummaryResponseMapper.toDTOList(repository.findAll(spec));
+        Page<Task> tasks = repository.findAll(spec, pageable);
+        return tasks.map(taskSummaryResponseMapper::toDTO);
     }
 }

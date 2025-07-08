@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -24,6 +25,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -184,21 +186,23 @@ public class TaskServiceTest {
         TaskSummaryResponse taskSummary1 = new TaskSummaryResponse(1, "Título teste 1", Priority.LOW, Status.DONE);
         TaskSummaryResponse taskSummary2 = new TaskSummaryResponse(2, "Título teste 2", Priority.LOW, Status.DONE);
 
-        List<TaskSummaryResponse> summaryList = List.of(taskSummary1, taskSummary2);
+        Page<Task> pageMock = new PageImpl<>(List.of(task1, task2));
+        Pageable pageable = PageRequest.of(0, 10, Sort.Direction.ASC, "dueDate");
 
-        when(repository.findAll(any(Specification.class))).thenReturn(List.of(task1, task2));
-        when(summaryMapper.toDTOList(List.of(task1, task2))).thenReturn(summaryList);
+        when(repository.findAll(any(Specification.class), eq(pageable))).thenReturn(pageMock);
+        when(summaryMapper.toDTO(task1)).thenReturn(taskSummary1);
+        when(summaryMapper.toDTO(task2)).thenReturn(taskSummary2);
 
-        List<TaskSummaryResponse> result = service.getFilteredTaskSummaries(new TaskFilterRequest("Título", null, null, null, Status.DONE, Priority.LOW));
+        Page<TaskSummaryResponse> result = service.getFilteredTaskSummaries(new TaskFilterRequest("Título", null, null, null, Status.DONE, Priority.LOW), pageable);
 
-        assertThat(result).hasSize(2);
+        assertThat(result.getContent()).hasSize(2);
 
-        assertThat(result.get(0).getTitle()).contains("Título");
-        assertThat(result.get(0).getPriority()).isEqualTo(Priority.LOW);
-        assertThat(result.get(0).getStatus()).isEqualTo(Status.DONE);
+        assertThat(result.getContent().get(0).getTitle()).contains("Título");
+        assertThat(result.getContent().get(0).getPriority()).isEqualTo(Priority.LOW);
+        assertThat(result.getContent().get(0).getStatus()).isEqualTo(Status.DONE);
 
-        assertThat(result.get(1).getTitle()).contains("Título");
-        assertThat(result.get(1).getPriority()).isEqualTo(Priority.LOW);
-        assertThat(result.get(1).getStatus()).isEqualTo(Status.DONE);
+        assertThat(result.getContent().get(1).getTitle()).contains("Título");
+        assertThat(result.getContent().get(1).getPriority()).isEqualTo(Priority.LOW);
+        assertThat(result.getContent().get(1).getStatus()).isEqualTo(Status.DONE);
     }
 }

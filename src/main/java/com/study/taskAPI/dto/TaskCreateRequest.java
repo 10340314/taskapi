@@ -1,6 +1,5 @@
 package com.study.taskAPI.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.study.taskAPI.enums.Priority;
 import com.study.taskAPI.enums.Status;
 import jakarta.validation.constraints.FutureOrPresent;
